@@ -1,0 +1,181 @@
+# SMPLink configuration.
+# Channel and role IDs: right-click the channel or role in Discord (Developer Mode on) and choose "Copy ID".
+# Leave an ID empty (or write "off") to turn that feature off.
+
+server:
+  # Shown in the bot's messages ("Welcome to ...", "Join ...").
+  name: "Our SMP"
+  # A short line under "Join ..." on the application panel. Empty = none.
+  tagline: ""
+
+discord:
+  # Set both to start the bot. Create the bot at https://discord.com/developers/applications
+  enabled: true
+  token: ""
+  guild-id: ""
+  # Members with this role can use the admin commands (/inv, /sync, /activitycheck, /strike, /joinlock).
+  admin-role-id: ""
+  # Also allowed to use /whitelist, /lookup and /warnings, so helpers can manage members without full admin.
+  whitelist-role-id: ""
+  # Given to every linked member. Empty = no role.
+  linked-role-id: ""
+  # Set linked members' server nicknames. {ign} = Minecraft name.
+  nickname-sync: false
+  nickname-format: "{ign}"
+  # The bot's status, followed by the current time in status-timezone. Empty = no status.
+  status: "Watching the server"
+  status-timezone: "UTC"
+
+linking:
+  # codes: players run /link in Minecraft and enter the code with /link on Discord.
+  # sheet: links are read from a Google Sheet instead (see sheet below); /link is turned off.
+  mode: codes
+  # How long a /link code works.
+  code-minutes: 10
+
+sheet:
+  # Only used with linking.mode: sheet. The sheet needs columns "MC Username" and "Discord" (user ID or username).
+  enabled: true
+  id: ""
+  # Tab to read. Empty = the first tab.
+  tab: ""
+  # Google service account key, relative to plugins/SMPLink/. Share the sheet with the service account's email.
+  key-file: "service-account.json"
+  sync-interval-minutes: 5
+
+link:
+  # Sheet mode: when a row moves a Discord ID to another Minecraft account, replace the old link (true)
+  # or skip the row and report a conflict (false).
+  allow-relinking: true
+  # Sheet mode: unlink players who are no longer in the sheet. Skipped if more than half would go at once.
+  remove-missing: true
+
+activity-check:
+  # Members under the weekly quota get a warning DM with a deadline grace-days later. Reach it and they get a
+  # congratulations DM; miss it and they get a strike. Members with an exempt role are never checked.
+  # /activitycheck pause stops everything; resuming starts a new season.
+  min-hours: 3
+  # Quota for "original" members (sheet mode: the sheet's first table). 0 = not checked.
+  original-min-hours: 1
+  grace-days: 3
+  exempt-roles: []
+  # Remind warned players in game (chat and action bar) every ingame-reminder-minutes.
+  ingame-reminders: true
+  ingame-reminder-minutes: 30
+  # Where each check's summary is posted. Empty = off.
+  log-channel-id: ""
+  # Run the check by itself every week at this time (discord.status-timezone).
+  weekly: false
+  day: SUNDAY
+  time: "20:00"
+  # {player} {playtime} {required} {needed} {deadline} {strikes} {max-strikes} {strike-expiry}
+  warning-message: "Hi {player}! This is an activity check. You've played {playtime} in the last 7 days, but members need at least {required} a week. Play **{needed}** more before {deadline}, or you'll get a strike. You have **{strikes} of {max-strikes}** strikes now; each lasts {strike-expiry}."
+  passed-message: "Nice one, {player}! You've reached {required} of playtime and passed this week's activity check. Thanks for playing!"
+  strike-message: "Hi {player}, you didn't reach {required} of playtime by the deadline, so you've received a strike. You now have **{strikes} of {max-strikes}** strikes. Each strike lasts {strike-expiry}."
+  removed-message: "Hi {player}, you didn't reach {required} of playtime by the deadline. That's strike {strikes} of {max-strikes}, so you've been removed from the server."
+  # Each strike and removal is posted here. Empty = off.
+  removal-channel-id: ""
+
+strikes:
+  # Reaching this many active strikes removes the member.
+  limit: 3
+  # A higher limit for members with one of these roles.
+  extended-limit: 6
+  extended-roles: []
+  expire-days: 90
+  # {player} {id} {reason} {strikes} {max-strikes} {strike-expiry}
+  message: "Hi {player}, you've received a strike (#{id}): {reason}. You now have **{strikes} of {max-strikes}** strikes. Each strike lasts {strike-expiry}."
+  removed-message: "Hi {player}, you've received a strike (#{id}): {reason}. That's strike {strikes} of {max-strikes}, so you've been removed from the server."
+
+recap:
+  # A weekly post with the top players (playtime, mob kills, blocks mined). Empty = off.
+  channel-id: ""
+  day: SUNDAY
+  time: "20:00"
+
+milestones:
+  # Announced when a linked player's all-time playtime passes one of these. Empty channel-id = off.
+  channel-id: ""
+  hours: [24, 50, 100, 200]
+  # {discord} = mention, {ign} = Minecraft name, {hours} = the milestone.
+  message: "{discord} - {ign} has reached {hours} hours!"
+  # A role for each milestone, for example:
+  #   roles:
+  #     "24": "123456789012345678"
+  # The bot's own role must be above these.
+  roles: {}
+  # false = members keep only their highest milestone role.
+  keep-lower-roles: false
+
+whitelist:
+  # Lets SMPLink run these commands: /whitelist add, accepted applications and strike removals use them.
+  # Sheet mode also keeps the whitelist in step with the sheet (only names the plugin added are removed).
+  # {name} = Minecraft name. These are the vanilla commands; change them for a whitelist plugin.
+  enabled: true
+  add-command: "whitelist add {name}"
+  remove-command: "whitelist remove {name}"
+  # /whitelist add donor:true also gives this role. Empty = no role.
+  donor-role-id: ""
+  # DM sent on /whitelist add. {player} {edition} {required}
+  welcome-message: "Welcome, {player}! You're whitelisted now. Join with your {edition} account. Members need at least {required} of playtime a week; check your progress any time with /playtime."
+
+applications:
+  # Join applications. /applications panel (admin) posts an "Apply to join" button in the channel you run it in.
+  # Staff get a card here with Accept (runs /whitelist add), Deny and Ask a question. "off" = no applications.
+  review-channel-id: "off"
+  # Pinged on each new application and allowed to decide them. "off" = no ping.
+  staff-role-id: "off"
+  # The rules message applicants should react to; the card shows whether they did. "off" = don't check.
+  rules-channel-id: "off"
+  rules-message-id: "off"
+  rules-emoji: "✅"
+  # Days a denied applicant waits before applying again.
+  reapply-days: 3
+
+welcome:
+  # A public welcome post when someone links. Empty = off.
+  channel-id: ""
+  # A post the first time a linked player joins the Minecraft server. Empty = off.
+  first-join-channel-id: ""
+
+trade:
+  # /trade posts trade offers here, with item pictures, an "I'm interested" button and vouch/report rep. Empty = off.
+  channel-id: ""
+  expire-days: 7
+  posts-per-hour: 3
+  footer: "This is only a place to find trades. Trade carefully!"
+  # Members with this role can middleman trades. Empty = no middlemen.
+  middleman-role-id: ""
+
+notices:
+  # Staff log of every /whitelist add and remove, and the default for crash-recovery cards. Empty = off.
+  audit-channel-id: ""
+
+crash-recovery:
+  enabled: true
+  # How often to snapshot online players (at least 10).
+  snapshot-seconds: 30
+  # Snapshots kept per player.
+  keep: 20
+  # Restore cards and health alerts. Empty uses notices.audit-channel-id.
+  staff-channel-id: ""
+  # Public "the server crashed" notice. Empty = no public notice.
+  announce-channel-id: ""
+  health:
+    # Logs memory, TPS, chunks and entities every minute to health-YYYY-MM-DD.log (kept 2 days) and alerts staff.
+    enabled: true
+    # Alert when the container's memory reaches this share of its limit.
+    memory-alert: 0.90
+    # Alert when TPS stays below this for 3 checks in a row.
+    tps-alert: 15
+    # On an alert: pause Chunky and lower view distance by 2 (min 4) until things recover.
+    relief: true
+
+backup:
+  # A copy of data.db is saved to plugins/SMPLink/backups once a day; the newest `keep` are kept.
+  enabled: true
+  keep: 7
+
+inventory-cache:
+  # How often online players' inventories are saved for /inv. Minimum 30.
+  interval-seconds: 300

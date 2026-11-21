@@ -1,0 +1,31 @@
+name: SMPLink
+version: '${version}'
+main: io.github.lrdrandomplayz.smplink.SMPLinkPlugin
+api-version: '1.21'
+author: lrdrandomplayz
+website: https://github.com/lrdrandomplayz/SMPLink
+description: Links Discord accounts to Minecraft players and runs a Discord bot for your SMP (profiles, playtime, activity checks, applications, trades).
+commands:
+  link:
+    description: Get a code to link your Discord account.
+    usage: /link
+    permission: smplink.link
+  linkinfo:
+    description: Show the Discord account linked to a player.
+    usage: /linkinfo <player>
+    permission: smplink.admin
+  smplink:
+    description: SMPLink admin commands.
+    usage: /smplink sync
+    permission: smplink.admin
+  joinlock:
+    description: Keep everyone but staff out until an opening time, which opens by itself.
+    usage: /joinlock until <yyyy-MM-dd> <HH:mm> [message] | off | status
+    permission: smplink.admin
+permissions:
+  smplink.link:
+    description: Use /link.
+    default: true
+  smplink.admin:
+    description: Use /linkinfo, /smplink and /joinlock.
+    default: op
